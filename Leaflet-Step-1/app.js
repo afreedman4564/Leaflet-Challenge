@@ -110,33 +110,69 @@ function createFeatures(earthquakeData) {
     var topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
       attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
     });
-  
+
+    var grayscale = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        subdomains: 'abcd',
+        minZoom: 0,
+        maxZoom: 20,
+        ext: 'png'
+    });
+
+    var worldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    });
+ 
     // Create a baseMaps object.
     var baseMaps = {
       "Street Map": street,
-      "Topographic Map": topo
+      "Topographic Map": topo,
+      "Gray Scale": grayscale,
+      "World Imagery": worldImagery
     };
-  
-    // Creat an overlays object.
-    // display the data points
-    var overlays = {
-      "Earthquake": earthquakes
-    }
   
     // Create a new map.
     // Edit the code to add the earthquake data to the layers.
+    // Center on Parkfield, CA...the earthquake capital of the world
     var myMap = L.map("map", {
       center: [
-        37.09, -95.71
+        35.8997, -120.4327
       ],
-      zoom: 5,
-      layers: [street, earthquakes]
+      zoom: 3,
+      layers: [street, earthquakes, topo, grayscale, worldImagery]
     });
   
+    
+    // get teh tectonic plate data and place on map
+    // variable for tectonic plate data
+
+    var tectonicPlates = new L.layerGroup();
+
+    // use API to get tectonic plate data
+    tectonicURL = ("https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json")
+    d3.json(tectonicURL).then(function(tectonicData){
+        // console.log("tectonic print test");
+        // console.log(tectonicData);
+
+        L.geoJSON(tectonicData,{
+            color: "red",
+            weight: 2
+        }).addTo(tectonicPlates);
+
+    });
+
+    // introduce the plates to the map
+    tectonicPlates.addTo(myMap);
+
+    var overlays = {
+          "Earthquake": earthquakes,
+          "Tectonic Plates": tectonicPlates
+        }
+    
     // Create a layer control that contains our baseMaps.
     // Be sure to add an overlay Layer that contains the earthquake GeoJSON.
-    L.control.layers(baseMaps, overlays ,{
-      collapsed: false
-    }).addTo(myMap);
-  
+    L.control.layers(baseMaps, overlays, {
+        collapsed: false
+        }).addTo(myMap);
+
   }

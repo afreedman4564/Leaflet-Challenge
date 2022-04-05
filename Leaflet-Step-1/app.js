@@ -212,7 +212,7 @@ function createFeatures(earthquakeData) {
                 + colors[i]
                 + "'></i> "
                 + intervals[i]
-                + (intervals[i + 1] ? "km &ndash km;" + intervals[i + 1] + "km<br>" : "+");
+                + (intervals[i + 1] ? "km to km;" + intervals[i + 1] + "km<br>" : "+");
             }
             return div;
 

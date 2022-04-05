@@ -42,14 +42,16 @@ function createFeatures(earthquakeData) {
     // this function picks colors for line based on depth
     function getLineColor(depth)
     {
-        if (depth > 60)
+        if (depth > 90)
             return "#3733FF"
-        else if (depth > 45)
+        else if (depth > 70)
             return "#33ADFF"
-        else if (depth > 30)
+        else if (depth > 50)
             return "#33FFF5"
-        else if (depth > 7)
+        else if (depth > 30)
             return "#33FF62"
+        else if (depth > 10)
+            return "#cafc03"
         else
             return "#FFF933"
     }
@@ -57,14 +59,16 @@ function createFeatures(earthquakeData) {
     // this function picks colors for the two circle data points
     function getFillColor(depth)
     {
-        if (depth > 60)
+        if (depth > 90)
             return "#3733FF"
-        else if (depth > 45)
+        else if (depth > 70)
             return "#33ADFF"
-        else if (depth > 30)
+        else if (depth > 50)
             return "#33FFF5"
-        else if (depth > 7)
+        else if (depth > 30)
             return "#33FF62"
+        else if (depth > 10)
+            return "#cafc03"
         else
             return "#FFF933"
         }
@@ -73,7 +77,8 @@ function createFeatures(earthquakeData) {
     function styleInfo(feature)
     {
         return {
-            opacity: 0.5,
+            opacity:0.5,
+            fillOpacity: 0.5,
             fillcollor: getFillColor(feature.geometry.coordinates[2]),
             color: getLineColor(feature.geometry.coordinates[2]),
             radius: getRadius(feature.properties.mag),
@@ -165,8 +170,9 @@ function createFeatures(earthquakeData) {
     tectonicPlates.addTo(myMap);
 
     var overlays = {
-          "Earthquake": earthquakes,
-          "Tectonic Plates": tectonicPlates
+        "Tectonic Plates": tectonicPlates,
+        "Earthquake": earthquakes
+          
         }
     
     // Create a layer control that contains our baseMaps.
@@ -174,5 +180,45 @@ function createFeatures(earthquakeData) {
     L.control.layers(baseMaps, overlays, {
         collapsed: false
         }).addTo(myMap);
+
+        // add legend with properties
+        // want same colors based on depth in km
+        let legend = L.control({
+            position: "bottomright"
+        });
+
+        legend.onAdd = function() {
+            // make a div so it appears on the page
+            let div = L.DomUtil.create("div", "info legend");
+
+            // setup the intervals
+            let intervals = [-10, 10, 30, 50, 70, 90];
+
+            // set the colors to align with depth from function
+            let colors = ["#FFF933",
+            "#cafc03",
+            "#33FF62",
+            "#33FFF5",
+            "#33ADFF",
+            "#3733FF"        
+            ];
+
+            // step through the intervals for depth and colors listed
+
+            for(var i = 0; i < intervals.length; i++)
+            {
+                // use inner HTML to set color to square for each interval
+                div.innerHTML += "<i style='background: "
+                + colors[i]
+                + "'></i> "
+                + intervals[i]
+                + (intervals[i + 1] ? "km &ndash km;" + intervals[i + 1] + "km<br>" : "+");
+            }
+            return div;
+
+        };
+
+        // add legend
+        legend.addTo(myMap);
 
   }
